@@ -1,7 +1,6 @@
 package com.csx.concurrency;
 
 import com.csx.concurrency.annoations.NotThreadSafe;
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.CountDownLatch;

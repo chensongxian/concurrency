@@ -1,8 +1,6 @@
 package com.csx.concurrency.example.count;
 
-import com.sun.xml.internal.xsom.impl.scd.Iterators;
 import lombok.extern.slf4j.Slf4j;
-import sun.rmi.runtime.Log;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
