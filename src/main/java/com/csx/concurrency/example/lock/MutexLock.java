@@ -2,10 +2,7 @@ package com.csx.concurrency.example.lock;
 
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Assert;
-import sun.tools.jconsole.Plotter;
 
-import java.util.Timer;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.AbstractQueuedSynchronizer;
 import java.util.concurrent.locks.Condition;
@@ -18,7 +15,7 @@ import java.util.concurrent.locks.StampedLock;
  * @Description: TODO
  * @date 2018/8/23 0023
  */
-@Slf4j
+//@Slf4j
 public class MutexLock implements Lock {
 
     public static class Sync extends AbstractQueuedSynchronizer {
@@ -42,8 +39,9 @@ public class MutexLock implements Lock {
         @Override
         protected boolean tryAcquire(int acquires) {
             assert acquires == 1;
-            System.out.println(getState());
+            System.out.println("尝试获取到同步状态的线程是："+Thread.currentThread().getName());
             if(compareAndSetState(0,1)) {
+                System.out.println("当前获取到同步状态的线程是："+Thread.currentThread().getName());
                 setExclusiveOwnerThread(Thread.currentThread());
                 return true;
             }
@@ -61,6 +59,7 @@ public class MutexLock implements Lock {
             if(getState()==0){
                 throw new IllegalMonitorStateException("锁未被线程占用");
             }
+            System.out.println("释放锁："+Thread.currentThread().getName());
             // 置为null表示锁未被任何线程占用
             setExclusiveOwnerThread(null);
             setState(0);
@@ -137,43 +136,73 @@ public class MutexLock implements Lock {
         return sync.hasQueuedThreads();
     }
 
-    /**同时并发执行的线程数*/
-    private static int threadTotal=10;
-    /**请求总数*/
-    private static int clientTotal=20;
-
-    private static int count=0;
-
-    private final static StampedLock lock = new StampedLock();
-
 
     public static void main(String[] args) throws InterruptedException {
-        final MutexLock mutexLock = new MutexLock();
-
-        ExecutorService exec= Executors.newCachedThreadPool();
-        final Semaphore semaphore=new Semaphore(threadTotal);
-        final CountDownLatch countDownLatch=new CountDownLatch(clientTotal);
-        for(int i=0;i<clientTotal;i++){
-            exec.execute(()->{
-                try {
-                    semaphore.acquire();
+        MutexLock mutexLock = new MutexLock();
+        // ---------------------------------Task one:
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!Thread.interrupted()) {
                     mutexLock.lock();
-                    add();
-                    mutexLock.unlock();
-                    semaphore.release();
-                }catch (Exception e){
-                    log.error("exception",e);
+                    try {
+                        System.out.println(Thread.currentThread().getName() + " acquired successfully!");
+                        TimeUnit.SECONDS.sleep(30);
+                        System.out.println(Thread.currentThread().getName() + " done!");
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        mutexLock.unlock();
+                    }
+                    break;
                 }
-                countDownLatch.countDown();
-            });
-        }
-        countDownLatch.await();
-        exec.shutdown();
-        log.info("count:{}",count);
+            }
+        }, "Task one").start();
+//        TimeUnit.SECONDS.sleep(1000);
+        // --------------------------------- Task two:
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!Thread.interrupted()) {
+                    mutexLock.lock();
+                    try {
+                        System.out.println(Thread.currentThread().getName() + " acquired successfully!");
+                        TimeUnit.SECONDS.sleep(50);
+                        System.out.println(Thread.currentThread().getName() + " done!");
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        mutexLock.unlock();
+                    }
+                    break;
+                }
+            }
+        }, "Task two").start();
+//        TimeUnit.MILLISECONDS.sleep(1000);
+        // --------------------------------- Task three:
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!Thread.interrupted()) {
+                    mutexLock.lock();
+                    try {
+                        System.out.println(Thread.currentThread().getName() + " acquired successfully!");
+                        TimeUnit.SECONDS.sleep(100);
+                        System.out.println(Thread.currentThread().getName() + " done!");
+
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } finally {
+                        mutexLock.unlock();
+                    }
+                    break;
+                }
+            }
+        }, "Task three").start();
     }
 
-    public static void add() throws InterruptedException {
-        TimeUnit.MILLISECONDS.sleep(1000);
-        count++;
-    }
+
 }
