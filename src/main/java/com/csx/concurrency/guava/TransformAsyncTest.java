@@ -1,5 +1,6 @@
 package com.csx.concurrency.guava;
 
+
 import com.google.common.util.concurrent.*;
 
 import java.util.concurrent.Callable;
@@ -23,38 +24,35 @@ public class TransformAsyncTest {
             }
         });
 
-        ListenableFuture<Integer> transformAsync2 = Futures.transformAsync(count, new AsyncFunction<Integer, Integer>() {
-            @Override
-            public ListenableFuture<Integer> apply(Integer integer) throws Exception {
-                Integer sumCount = integer + 40;
-                ListenableFuture<Integer> sum = executorService.submit(new Callable<Integer>() {
-                    @Override
-                    public Integer call() throws Exception {
-                        System.out.println(sumCount);
-                        return sumCount;
-                    }
-                });
-                return sum;
-            }
-        });
+//        ListenableFuture<Integer> transformAsync2 = Futures.transformAsync(count, new AsyncFunction<Integer, Integer>() {
+//            @Override
+//            public ListenableFuture<Integer> apply(Integer integer) throws Exception {
+//                Integer sumCount = integer + 40;
+//                ListenableFuture<Integer> sum = executorService.submit(new Callable<Integer>() {
+//                    @Override
+//                    public Integer call() throws Exception {
+//                        System.out.println(sumCount);
+//                        return sumCount;
+//                    }
+//                });
+//                return sum;
+//            }
+//        });
+//
+//
+//        ListenableFuture<Integer> transformAsync1 = Futures.transformAsync(transformAsync2, (AsyncFunction<Integer, Integer>) integer -> {
+//            Integer sumCount = integer - 10;
+//            ListenableFuture<Integer> sum = executorService.submit(new Callable<Integer>() {
+//                @Override
+//                public Integer call() throws Exception {
+//                    System.out.println(sumCount);
+//                    return sumCount;
+//                }
+//            });
+//            return sum;
+//        });
 
-
-        ListenableFuture<Integer> transformAsync1 = Futures.transformAsync(transformAsync2, new AsyncFunction<Integer, Integer>() {
-            @Override
-            public ListenableFuture<Integer> apply(Integer integer) throws Exception {
-                Integer sumCount = integer - 10;
-                ListenableFuture<Integer> sum = executorService.submit(new Callable<Integer>() {
-                    @Override
-                    public Integer call() throws Exception {
-                        System.out.println(sumCount);
-                        return sumCount;
-                    }
-                });
-                return sum;
-            }
-        });
-
-        Integer integer = transformAsync1.get();
-        System.out.println("异步转换："+integer);
+//        Integer integer = transformAsync1.get();
+//        System.out.println("异步转换："+integer);
     }
 }
